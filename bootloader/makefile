@@ -14,8 +14,8 @@ SRCS = main.c
 OBJS = main.o
 
 
-main.efi:  main.so
-	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .reloc --target=efi-app-x86_64 main.so main.efi
+boot.efi:  main.so
+	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .reloc --target=efi-app-x86_64 main.so boot.efi
 	
 
 main.so:  main.o
@@ -25,7 +25,7 @@ main.o:  main.c
 	$(CC) $(CFLAGS) -c main.c -o main.o
 
 clean:
-	rm main.o main.so main.efi
+	rm main.o main.so boot.efi
 
 
 buildimg:
@@ -33,7 +33,7 @@ buildimg:
 	mformat -i ../Penumbra.img -f 1440 ::
 	mmd -i ../Penumbra.img ::/EFI
 	mmd -i ../Penumbra.img ::/EFI/BOOT
-	mcopy -i ../Penumbra.img main.efi ::/EFI/BOOT
+	mcopy -i ../Penumbra.img boot.efi ::/EFI/BOOT
 	mcopy -i ../Penumbra.img startup.nsh ::/EFI/BOOT
 
 
