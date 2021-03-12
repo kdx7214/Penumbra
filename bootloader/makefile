@@ -25,7 +25,7 @@ main.o:  main.c
 	$(CC) $(CFLAGS) -c main.c -o main.o
 
 clean:
-	rm main.o main.so ../build/boot.efi
+	rm main.o main.so ../build/boot.efi ../build/Penumbra.img
 
 
 buildimg:

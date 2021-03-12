@@ -1,5 +1,6 @@
 #include <efi.h>
 #include <efilib.h>
+#include "elf.h"
 
 
 //

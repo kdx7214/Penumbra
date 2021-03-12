@@ -1,7 +1,7 @@
-*.h
 *.o
 *.so
 *.efi
 *.img
+*.elf
 /Penumbra.img
 
