@@ -14,8 +14,8 @@ SRCS = main.c
 OBJS = main.o
 
 
-boot.efi:  main.so
-	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .reloc --target=efi-app-x86_64 main.so boot.efi
+../build/boot.efi:  main.so
+	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .reloc --target=efi-app-x86_64 main.so ../build/boot.efi
 	
 
 main.so:  main.o
@@ -25,20 +25,21 @@ main.o:  main.c
 	$(CC) $(CFLAGS) -c main.c -o main.o
 
 clean:
-	rm main.o main.so boot.efi
+	rm main.o main.so ../build/boot.efi
 
 
 buildimg:
-	dd if=/dev/zero of=../Penumbra.img bs=512 count=93750
-	mformat -i ../Penumbra.img -f 1440 ::
-	mmd -i ../Penumbra.img ::/EFI
-	mmd -i ../Penumbra.img ::/EFI/BOOT
-	mcopy -i ../Penumbra.img boot.efi ::/EFI/BOOT
-	mcopy -i ../Penumbra.img startup.nsh ::/EFI/BOOT
+	dd if=/dev/zero of=../build/Penumbra.img bs=512 count=93750
+	mformat -i ../build/Penumbra.img -f 1440 ::
+	mmd -i ../build/Penumbra.img ::/EFI
+	mmd -i ../build/Penumbra.img ::/EFI/BOOT
+	mcopy -i ../build/Penumbra.img ../build/boot.efi ::/EFI/BOOT
+	mcopy -i ../build/Penumbra.img ../build/startup.nsh ::/EFI/BOOT
+	mcopy -i ../build/Penumbra.img ../build/bootstrap.elf ::/EFI/BOOT
 
 
 run:
-	$(QEMU) -drive format=raw,file=../Penumbra.img -m 256M -cpu qemu64 \
+	$(QEMU) -drive format=raw,file=../build/Penumbra.img -m 256M -cpu qemu64 \
 		-drive if=pflash,format=raw,unit=0,file=/usr/share/OVMF/OVMF_CODE_4M.fd,readonly=on \
 		-drive if=pflash,format=raw,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd,readonly=on -net none
 
