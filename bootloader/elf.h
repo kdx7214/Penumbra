@@ -12,7 +12,11 @@
 #define ET_EXEC 2
 #define ET_DYN 3
 
-#define ELF_MAGIC 0x7f454c46
+#define ELF_MAGIC			0x464c457f
+#define ELF_AMD64			0x3e
+#define ELF_64BIT			2
+#define ELF_LITTLEENDIAN	1
+
 
 #pragma pack(1)
 
@@ -36,7 +40,7 @@ typedef struct {
 	UINT16	e_phnum ;				// Number of entries in program header table
 	UINT16	e_shentsize ;			// Size of section header table entry
 	UINT16	e_shnum ;				// Number of entries in section header table
-	UINT16	e_shstrnds ;			// Index of section header table with section names
+	UINT16	e_shstrndx ;			// Index of section header table with section names
 } Elf64Header ;
 
 

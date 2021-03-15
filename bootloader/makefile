@@ -10,22 +10,22 @@ CFLAGS += -I ../gnu-efi/inc -I ../gnu-efi/inc/x86_64
 LDFLAGS = -nostdlib -znocombreloc -shared -Bsymbolic -T ../gnu-efi/gnuefi/elf_x86_64_efi.lds -L ../gnu-efi/x86_64/lib -L ../gnu-efi/x86_64/gnuefi
 
 
-SRCS = main.c
-OBJS = main.o
+SRCS = main.c efi.c
+OBJS = main.o efi.o
 
 
 ../build/boot.efi:  main.so
 	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela -j .reloc --target=efi-app-x86_64 main.so ../build/boot.efi
 	
 
-main.so:  main.o
-	$(LD) main.o ../gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o $(LDFLAGS) -l:libefi.a -l:libgnuefi.a -o main.so
+main.so:  $(OBJS)
+	$(LD) $(OBJS) ../gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o $(LDFLAGS) -l:libefi.a -l:libgnuefi.a -o main.so
 
-main.o:  main.c
-	$(CC) $(CFLAGS) -c main.c -o main.o
+%.o:  %c.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm main.o main.so ../build/boot.efi ../build/Penumbra.img
+	rm $(OBJS) main.so ../build/boot.efi ../build/Penumbra.img
 
 
 buildimg:
@@ -35,7 +35,7 @@ buildimg:
 	mmd -i ../build/Penumbra.img ::/EFI/BOOT
 	mcopy -i ../build/Penumbra.img ../build/boot.efi ::/EFI/BOOT
 	mcopy -i ../build/Penumbra.img ../build/startup.nsh ::/EFI/BOOT
-	mcopy -i ../build/Penumbra.img ../build/bootstrap.elf ::/EFI/BOOT
+	mcopy -i ../build/Penumbra.img ../build/kernel.elf ::/EFI/BOOT
 
 
 run:
