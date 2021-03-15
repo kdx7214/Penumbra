@@ -83,6 +83,18 @@ UINT8 *ReadFile(EFI_FILE_HANDLE fp, UINT64 size) {
 
 
 //
+// ReadFileAt:	Read file at a particular point in memory, allowing the
+//				request of a number of pages
+//
+UINT8 *ReadFileAt(EFI_SYSTEM_TABLE *st, EFI_FILE_HANDLE fp, UINT64 size, void *p_addr) {
+	UINT64 pages = (size + 0x1000 - 1) / 0x1000 ;
+	EFI_PHYSICAL_ADDRESS *address = (EFI_PHYSICAL_ADDRESS *)p_addr ;
+	st->BootServices->AllocatePages(AllocateAddress, EfiLoaderData, pages, (EFI_PHYSICAL_ADDRESS *)address) ;	
+	UINT8* buffer = ReadFile(fp, size) ;
+}
+
+
+//
 // memcmp:	Compare two blocks of memory
 //
 int memcmp(const void *ptr_a, const void *ptr_b, UINT64 size) {

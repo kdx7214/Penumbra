@@ -16,7 +16,7 @@
 #define ELF_AMD64			0x3e
 #define ELF_64BIT			2
 #define ELF_LITTLEENDIAN	1
-
+#define ELF_EVCURRENT		1
 
 #pragma pack(1)
 
