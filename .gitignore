@@ -3,5 +3,6 @@
 *.efi
 *.img
 *.elf
-/Penumbra.img
+*.out
+./build/Penumbra.img
 
