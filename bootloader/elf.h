@@ -93,37 +93,4 @@ typedef struct {
 	UINT64		sh_entsize ;		// Size in bytes of each entry that have fixed sized entries, otherwise 0
 } Elf64SectionHeader ;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif
-
