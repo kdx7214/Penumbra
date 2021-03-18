@@ -71,18 +71,23 @@ UINT64 ReadElf(CHAR16 *fname, EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTa
 	Elf64Header			*elf_hdr ;
 	UINT64				entry ;
 
+	Print(L"ReadElf:   Starting\r\n") ;
+
+	Print(L"           Opening file\r\n") ;
 	fp = OpenFile(fname, ImageHandle, SystemTable) ;
 	if (fp == NULL) {
-		Print(L"     Error loading ELF file.\r\n") ;
+		Print(L"     Error opening ELF file.\r\n") ;
 		return 0 ;
 	}
 
+	Print(L"           Verifying file size\r\n") ;
 	if (FileSize(fp) < sizeof(Elf64Header)) {
 		Print(L"     Invalid ELF header.\r\n") ;
 		CloseFile(fp) ;
 		return 0 ;
 	}
 
+	Print(L"           Reading ELF header\r\n") ;
 	Elf64Header *elf_header = (Elf64Header *)ReadFile(fp, sizeof(Elf64Header)) ;
 	if (check_elf(elf_header) != EFI_SUCCESS) {
 		FreePool(elf_header) ;
@@ -93,6 +98,7 @@ UINT64 ReadElf(CHAR16 *fname, EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTa
 	Elf64ProgramHeader	*ph ;
 	int					abort = 0 ;
 
+	Print(L"           Reading ELF program headers\r\n") ;
 	for (int i = 0; i < elf_header->e_phnum; ++i) {
 		UINTN pos = elf_header->e_phoff + (i * sizeof(Elf64ProgramHeader)) ;
 
@@ -111,6 +117,8 @@ UINT64 ReadElf(CHAR16 *fname, EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTa
 			Print(L"     Error setting position\r\n") ;
 			abort++ ;
 		}
+
+		Print(L"           Reading ELF program data\r\n") ;
 		UINT8 *r = ReadFileAt(SystemTable, fp, ph->p_filesz, (void *)ph->p_paddr) ;
 		if (r != (UINT8 *)ph->p_paddr) {
 			Print(L"     Address mismatch\r\n") ;

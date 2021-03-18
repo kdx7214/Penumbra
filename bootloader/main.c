@@ -20,6 +20,7 @@
 
 #include <efi.h>
 #include <efilib.h>
+#include <preload.h>
 #include "elf.h"
 
 extern EFI_FILE_HANDLE OpenFile(CHAR16 *fname, EFI_HANDLE image, EFI_SYSTEM_TABLE *st) ;
@@ -49,21 +50,39 @@ extern UINT64 ReadElf(CHAR16 *fname, EFI_HANDLE image, EFI_SYSTEM_TABLE *st) ;
 
 EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 {
-	UINT64				entry ;
+	UINT64				entry, dentry ;
 
 	InitializeLib(ImageHandle, SystemTable) ;
+
+
+	Print(L"\r\nLoading GOP driver\r\n") ;
+	dentry = ReadElf(L"EFI\\BOOT\\gopfbdrv.elf", ImageHandle, SystemTable) ;
+	if (dentry == 0)
+	{
+		Print(L"Error loading gop driver\r\n") ;
+		return EFI_ABORTED ;
+	}
+	Print(L"\r\nDriver entry point:  %lx\r\n", (UINTN)dentry) ;
+	preload_driver *(*DriverInit)(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) = ((__attribute__((sysv_abi)) preload_driver *(*)(EFI_HANDLE, EFI_SYSTEM_TABLE *) ) dentry) ;
+	preload_driver *gopfb = DriverInit(ImageHandle, SystemTable) ;
+	Print(L"gopfb->data[0]  == %lu\r\n", (UINTN)gopfb->data[0]) ;
+	Print(L"gopfb->data[1] == %lu\r\n", (UINTN)gopfb->data[1]) ;
+	Print(L"gopfb->data[2] == %lu\r\n", (UINTN)gopfb->data[2]) ;
+	Print(L"gopfb->data[3] == %lu\r\n", (UINTN)gopfb->data[3]) ;
+	Print(L"gopfb->error == %lu\r\n", gopfb->error) ;
+
+
+
 	Print(L"Loading kernel...\r\n") ;
-
-
 	entry = ReadElf(L"EFI\\BOOT\\kernel.elf", ImageHandle, SystemTable) ;
-
 	if (entry == 0) 
 	{
 		Print(L"Error loading kernel.  Aborting.\r\n") ;
 		return EFI_ABORTED ;
 	}
-
 	Print(L"Successfully loaded kernel\r\n") ;
+	Print(L"Kernel entry point:  %lx\r\n", (UINTN)entry) ;
+
 
 	//
 	// Get system memory map
@@ -77,8 +96,6 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 	//SystemTable->BootServices->AllocatePool(EfiLoaderData, bp.msize, (void **)&bp.map) ;
 	//SystemTable->BootServices->GetMemoryMap(&bp.msize, bp.map, &mkey, &bp.dsize, &dversion) ;
 
-	//Print(L"\r\nProgram entry point:  %lx\r\n", (UINTN)entry) ;
-	//Print(L"Program load address:  %lx\r\n", (UINTN)(elf_header->e_entry - KERNEL_OFFSET)) ;
 
 
 	int (*KernelMain)(b_param *) = ((__attribute__((sysv_abi)) int (*)(b_param *) ) entry) ;

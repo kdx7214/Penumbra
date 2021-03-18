@@ -1,9 +1,9 @@
 CC = gcc
 LD = ld
-LDS = kernel.ld
+LDS = gopfbdrv.ld
 QEMU = qemu-system-x86_64
 
-CFLAGS =  -ffreestanding -fshort-wchar
+CFLAGS =  -ffreestanding -fshort-wchar -I ../gnu-efi/inc -I ../gnu-efi/inc/x86_64 -I ../include
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib
 BUILD = ../build
 
@@ -16,20 +16,22 @@ rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(su
 SRC = $(call rwildcard,$(SRCDIR),*.cpp)
 OBJS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRC))
 
-kernel: $(OBJS) link
+gopfbdrv: $(OBJS) font link
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $^ -o $@
 
+font:
+	objcopy -O elf64-x86-64 -B i386 -I binary $(SRCDIR)/zap-light24.psf $(OBJDIR)/font.o
 
 link:
-	$(LD) $(LDFLAGS) -o $(BUILD)/kernel.elf $(OBJS)
+	$(LD) $(LDFLAGS) -o $(BUILD)/gopfbdrv.elf $(OBJS) $(OBJDIR)/font.o
 
 clean:
 	@rm build/*
 	@rm ../build/Penumbra.img
-	@rm ../build/kernel.elf
+	@rm ../build/gopfbdrv.elf
 
 buildimg:
 	dd if=/dev/zero of=../build/Penumbra.img bs=512 count=93750
@@ -41,7 +43,7 @@ buildimg:
 	mcopy -i ../build/Penumbra.img ../build/kernel.elf ::/EFI/BOOT
 	mcopy -i ../build/Penumbra.img ../build/gopfbdrv.elf ::/EFI/BOOT
 
-run:
+run: buildimg
 	$(QEMU) -drive format=raw,file=../build/Penumbra.img -m 256M -cpu qemu64 \
 		-drive if=pflash,format=raw,unit=0,file=/usr/share/OVMF/OVMF_CODE_4M.fd,readonly=on \
 		-drive if=pflash,format=raw,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd,readonly=on -net none

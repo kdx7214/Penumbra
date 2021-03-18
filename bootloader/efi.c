@@ -4,8 +4,7 @@
 
 
 //
-// OpenFile:	Open a file for reading from the base directory of the volume (/EFI/BOOT)
-// 		TODO:  Need to add ability to specifiy directories with limited string handling
+// OpenFile:	Open a file for reading from the base directory of the volume (\EFI\BOOT)
 //
 EFI_FILE_HANDLE OpenFile(CHAR16* fname, EFI_HANDLE image, EFI_SYSTEM_TABLE *st) {
 	EFI_LOADED_IMAGE	*li = NULL ;
@@ -13,21 +12,27 @@ EFI_FILE_HANDLE OpenFile(CHAR16* fname, EFI_HANDLE image, EFI_SYSTEM_TABLE *st) 
 	EFI_STATUS			r ;
 	EFI_FILE_HANDLE		volume, f ;
 
+	Print(L"OpenFile:   Open file %s\r\n", fname) ;
 	st->BootServices->HandleProtocol(image, &lip, (void **)&li) ;
 	if (li == NULL) {
-		Print(L"Error getting LoadedImage\r\n") ;
+		Print(L"     Error getting LoadedImage\r\n") ;
 		return NULL ;
 	}
 
+	Print(L"            Opening root directory\r\n") ;
 	volume = LibOpenRoot(li->DeviceHandle) ;
-
 	if (volume == NULL) {
+		Print(L"     Error getting volume root\r\n") ;
 		return NULL ;
 	}
+
+	Print(L"            Opening file\r\n") ;
 	r = volume->Open(volume, &f, fname, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY) ;
-	if (EFI_ERROR(r)) {
+	if (r != EFI_SUCCESS) {
+		Print(L"     Error opening file (%d)\r\n", r) ;
 		return NULL ;
 	}
+	Print(L"            Done opening file\r\n") ;
 
 	return f ;
 }

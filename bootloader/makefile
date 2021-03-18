@@ -5,7 +5,7 @@ QEMU = qemu-system-x86_64
 
 CFLAGS =  -fno-stack-protector -fpic -fshort-wchar -mno-red-zone -mno-avx -fno-strict-aliasing -ffreestanding -fno-stack-check -fno-merge-all-constants
 CFLAGS += -maccumulate-outgoing-args --std=c11 -D__KERNEL__ -DCONFIG_X86_64 -DGNU_EFI_USE_MS_ABI -DEFI_FUNCTION_WRAPPER 
-CFLAGS += -I ../gnu-efi/inc -I ../gnu-efi/inc/x86_64 
+CFLAGS += -I ../gnu-efi/inc -I ../gnu-efi/inc/x86_64  -I ../include
 
 LDFLAGS = -nostdlib -znocombreloc -shared -Bsymbolic -T ../gnu-efi/gnuefi/elf_x86_64_efi.lds -L ../gnu-efi/x86_64/lib -L ../gnu-efi/x86_64/gnuefi
 
@@ -36,6 +36,7 @@ buildimg:
 	mcopy -i ../build/Penumbra.img ../build/boot.efi ::/EFI/BOOT
 	mcopy -i ../build/Penumbra.img ../build/startup.nsh ::/EFI/BOOT
 	mcopy -i ../build/Penumbra.img ../build/kernel.elf ::/EFI/BOOT
+	mcopy -i ../build/Penumbra.img ../build/gopfbdrv.elf ::/EFI/BOOT
 
 
 run: ../build/boot.efi buildimg
