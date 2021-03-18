@@ -90,24 +90,8 @@ UINT8 *ReadFileAt(EFI_SYSTEM_TABLE *st, EFI_FILE_HANDLE fp, UINT64 size, void *p
 	UINT64 pages = (size + 0x1000 - 1) / 0x1000 ;
 	UINT64		sz = size ;
 	EFI_PHYSICAL_ADDRESS p = (EFI_PHYSICAL_ADDRESS)p_addr ;
-
-#ifdef __DEBUG
-	Print(L"     ReadFileAt:  Number pages:  %d\r\n", pages) ;
-	Print(L"     ReadFileAt:  Number bytes:  %ld (0x%lx)\r\n", size, size) ;
-#endif
-	
 	st->BootServices->AllocatePages(AllocateAddress, EfiLoaderData, pages, p_addr) ;
-
-#ifdef __DEBUG
-	Print(L"     ReadFileAt:  AllocPages returned memory address:  0x%lx\r\n", (UINTN)p) ;
-#endif
-	
 	fp->Read(fp, &sz, p_addr) ;
-
-#ifdef __DEBUG
-	Print(L"     ReadFileAt:  After read call\r\n") ;
-#endif
-
 	return (UINT8 *)p ;
 }
 

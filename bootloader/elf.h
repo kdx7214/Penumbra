@@ -18,6 +18,10 @@
 #define ELF_LITTLEENDIAN	1
 #define ELF_EVCURRENT		1
 
+#define KERNEL_LOAD			0xf000000000020000
+#define KERNEL_OFFSET		0xf000000000000000
+#define KERNEL_MEM_PAGES	1024
+
 #pragma pack(1)
 
 typedef struct {

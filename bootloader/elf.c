@@ -2,6 +2,13 @@
 #include <efilib.h>
 #include "elf.h"
 
+extern EFI_FILE_HANDLE OpenFile(CHAR16 *fname, EFI_HANDLE image, EFI_SYSTEM_TABLE *st) ;
+extern EFI_STATUS SetPosition(EFI_FILE_HANDLE fp, UINTN position) ;
+extern EFI_STATUS CloseFile(EFI_FILE_HANDLE fp) ;
+extern UINT64 FileSize(EFI_FILE_HANDLE fp) ;
+extern UINT8 *ReadFile(EFI_FILE_HANDLE fp, UINT64 size) ;
+extern UINT8 *ReadFileAt(EFI_SYSTEM_TABLE *st, EFI_FILE_HANDLE fp, UINT64 size, void *p_addr) ;
+
 //
 // elf_check:  Do sanity checks on the ELF header
 //
@@ -50,5 +57,77 @@ EFI_STATUS check_elf(Elf64Header *elf)
 	}
 
 	return EFI_SUCCESS ;
+}
+
+
+//
+// ReadElf:	Read en elf linked file into memory.  If it's load address is
+//			above KERNEL_OFFSET then relocate to paddr - KERNEL_OFFSET
+//
+
+UINT64 ReadElf(CHAR16 *fname, EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
+{
+	EFI_FILE_HANDLE		fp ;
+	Elf64Header			*elf_hdr ;
+	UINT64				entry ;
+
+	fp = OpenFile(fname, ImageHandle, SystemTable) ;
+	if (fp == NULL) {
+		Print(L"     Error loading ELF file.\r\n") ;
+		return 0 ;
+	}
+
+	if (FileSize(fp) < sizeof(Elf64Header)) {
+		Print(L"     Invalid ELF header.\r\n") ;
+		CloseFile(fp) ;
+		return 0 ;
+	}
+
+	Elf64Header *elf_header = (Elf64Header *)ReadFile(fp, sizeof(Elf64Header)) ;
+	if (check_elf(elf_header) != EFI_SUCCESS) {
+		FreePool(elf_header) ;
+		CloseFile(fp) ;
+		return 0 ;
+	}
+
+	Elf64ProgramHeader	*ph ;
+	int					abort = 0 ;
+
+	for (int i = 0; i < elf_header->e_phnum; ++i) {
+		UINTN pos = elf_header->e_phoff + (i * sizeof(Elf64ProgramHeader)) ;
+
+		if (SetPosition(fp, pos) != EFI_SUCCESS) { 
+			FreePool(elf_header) ;
+			CloseFile(fp) ;
+			return 0 ;
+		}
+		ph = (Elf64ProgramHeader *)ReadFile(fp, sizeof(Elf64ProgramHeader)) ;
+		if (ph->p_type != PT_LOAD) {
+			FreePool(ph) ;
+			continue ;
+		}
+
+		if (SetPosition(fp, ph->p_offset) != EFI_SUCCESS) {
+			Print(L"     Error setting position\r\n") ;
+			abort++ ;
+		}
+		UINT8 *r = ReadFileAt(SystemTable, fp, ph->p_filesz, (void *)ph->p_paddr) ;
+		if (r != (UINT8 *)ph->p_paddr) {
+			Print(L"     Address mismatch\r\n") ;
+			abort++ ;
+		}
+		FreePool(ph) ;
+	} // for (...)
+
+	entry = elf_header->e_entry ;
+	FreePool(elf_header) ;
+	CloseFile(fp) ;
+	if (abort) {
+		Print(L"     Error loading kernel.\r\n") ;
+		return 0 ;
+	}
+
+	return entry ;
+
 }
 
