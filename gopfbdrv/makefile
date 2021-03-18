@@ -3,7 +3,10 @@ LD = ld
 LDS = gopfbdrv.ld
 QEMU = qemu-system-x86_64
 
-CFLAGS =  -ffreestanding -fshort-wchar -I ../gnu-efi/inc -I ../gnu-efi/inc/x86_64 -I ../include
+CFLAGS =  -fno-stack-protector -fpic -fshort-wchar -mno-red-zone -mno-avx -fno-strict-aliasing -ffreestanding -fno-stack-check -fno-merge-all-constants
+CFLAGS += -maccumulate-outgoing-args -D__KERNEL__ -DCONFIG_X86_64 -DGNU_EFI_USE_MS_ABI -DEFI_FUNCTION_WRAPPER 
+CFLAGS += -I ../gnu-efi/inc -I ../gnu-efi/inc/x86_64  -I ../include
+
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib
 BUILD = ../build
 

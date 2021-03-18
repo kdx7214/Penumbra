@@ -43,8 +43,8 @@ extern "C" preload_driver *DriverInit(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *
 	pd.ioctl = (preload_ioctl)NULL ;
 	pd.error = 0 ;
 
-	//status = SystemTable->BootServices->LocateProtocol(&gopguid, NULL, (void **)&gop) ;
-	status = uefi_call_wrapper(BS->LocateProtocol, 3, &gopguid, NULL, (void **)&gop) ;
+	status = SystemTable->BootServices->LocateProtocol(&gopguid, NULL, (void **)&gop) ;
+	//status = uefi_call_wrapper(BS->LocateProtocol, 3, &gopguid, NULL, (void **)&gop) ;
 	if (status != EFI_SUCCESS) {
 		pd.error = 1 ;
 		return &pd ;
