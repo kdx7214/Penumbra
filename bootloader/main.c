@@ -23,6 +23,8 @@
 #include <preload.h>
 #include "elf.h"
 
+#define __DEBUG
+
 extern EFI_FILE_HANDLE OpenFile(CHAR16 *fname, EFI_HANDLE image, EFI_SYSTEM_TABLE *st) ;
 extern EFI_STATUS SetPosition(EFI_FILE_HANDLE fp, UINTN position) ;
 extern EFI_STATUS CloseFile(EFI_FILE_HANDLE fp) ;
@@ -69,9 +71,9 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 #ifdef __DEBUG
 	Print(L"\r\nDriver entry point:  %lx\r\n", (UINTN)dentry) ;
 	Print(L"gop data[0]:  0x%lx\r\n", gopfb->data[0]) ;
-	Print(L"gop data[1]:  %lu\r\n", gopfb->data[1]) ;
-	Print(L"gop data[2]:  %lu\r\n", gopfb->data[2]) ;
-	Print(L"gop data[3]:  %lu\r\n", gopfb->data[3]) ;
+	Print(L"gop data[1]:  0x%lx\r\n", gopfb->data[1]) ;
+	Print(L"gop data[2]:  0x%lx\r\n", gopfb->data[2]) ;
+	Print(L"gop data[3]:  0x%lx\r\n", gopfb->data[3]) ;
 	Print(L"gop error:  %lu\r\n", gopfb->error) ;
 #endif
 

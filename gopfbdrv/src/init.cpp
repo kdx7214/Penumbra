@@ -1,29 +1,4 @@
-
-#include <preload.h>
-
-
-//
-// Global variables used in this driver.  These can be used internally or
-// passed back to the bootloader/kernel.
-//
-
-preload_driver		pd ;
-void				*fbaddr ;
-uint64_t			size, width, height, pixperscanline ;
-
-
-//
-// write:  Write bytes to the console
-//
-
-uint64_t write(void *buffer, uint64_t size) 
-{
-
-
-
-
-	return 0 ;
-}
+#include "gopfb.h"
 
 //
 // DriverInit:  Initialize driver and return control struct
@@ -58,11 +33,14 @@ extern "C" preload_driver *DriverInit(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *
 	height = gop->Mode->Info->VerticalResolution ;
 	pixperscanline = gop->Mode->Info->PixelsPerScanLine ;
 
-	pd.data[0] = (uint64_t)fbaddr ;
-	pd.data[1] = size ;
+	//pd.data[0] = (uint64_t)fbaddr ;
+	pd.data[0] = (uint64_t)&_binary_src_zap_light24_psf_start ;
+	pd.data[1] = (uint64_t)&_binary_src_zap_light24_psf_end ;
 	pd.data[2] = width ;
 	pd.data[3] = height ;
 	pd.error = 777 ;
+
+	// *((uint32_t*)(fbaddr + 4 * pixperscanline * 400 + 600 + 4 * 32)) = 0xffff00 ;
 
 
 	// Get the current mode information so we can scan the modes for native resolution
