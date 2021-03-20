@@ -3,7 +3,7 @@ LD = ld
 LDS = kernel.ld
 QEMU = qemu-system-x86_64
 
-CFLAGS =  -ffreestanding -fshort-wchar
+CFLAGS =  -ffreestanding -fshort-wchar -std=c++11
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib
 BUILD = ../build
 

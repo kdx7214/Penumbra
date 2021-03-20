@@ -4,7 +4,7 @@ LDS = gopfbdrv.ld
 QEMU = qemu-system-x86_64
 
 CFLAGS =  -fno-stack-protector -fpic -fshort-wchar -mno-red-zone -mno-avx -fno-strict-aliasing -ffreestanding -fno-stack-check -fno-merge-all-constants
-CFLAGS += -maccumulate-outgoing-args -D__KERNEL__ -DCONFIG_X86_64 -DGNU_EFI_USE_MS_ABI -DEFI_FUNCTION_WRAPPER 
+CFLAGS += -maccumulate-outgoing-args -D__KERNEL__ -DCONFIG_X86_64 -DGNU_EFI_USE_MS_ABI -DEFI_FUNCTION_WRAPPER -std=c++11
 CFLAGS += -I ../gnu-efi/inc -I ../gnu-efi/inc/x86_64  -I ../include
 
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib
@@ -47,7 +47,7 @@ buildimg:
 	mcopy -i ../build/Penumbra.img ../build/gopfbdrv.elf ::/EFI/BOOT
 
 run: buildimg
-	$(QEMU) -drive format=raw,file=../build/Penumbra.img -m 256M -cpu qemu64 \
+	$(QEMU) -vga std -drive format=raw,file=../build/Penumbra.img -m 256M -cpu qemu64 \
 		-drive if=pflash,format=raw,unit=0,file=/usr/share/OVMF/OVMF_CODE_4M.fd,readonly=on \
 		-drive if=pflash,format=raw,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd,readonly=on -net none
 
