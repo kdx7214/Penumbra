@@ -40,7 +40,7 @@ buildimg:
 
 
 run: ../build/boot.efi buildimg
-	$(QEMU) -drive format=raw,file=../build/Penumbra.img -m 256M -cpu qemu64 \
+	$(QEMU) -vga std -drive format=raw,file=../build/Penumbra.img -m 256M -cpu qemu64 \
 		-drive if=pflash,format=raw,unit=0,file=/usr/share/OVMF/OVMF_CODE_4M.fd,readonly=on \
 		-drive if=pflash,format=raw,unit=1,file=/usr/share/OVMF/OVMF_VARS_4M.fd,readonly=on -net none
 
