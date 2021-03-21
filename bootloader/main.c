@@ -56,8 +56,7 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 
 	InitializeLib(ImageHandle, SystemTable) ;
 
-
-	Print(L"\r\nLoading GOP driver\r\n") ;
+//	Print(L"\r\nLoading GOP driver\r\n") ;
 	dentry = ReadElf(L"EFI\\BOOT\\gopfbdrv.elf", ImageHandle, SystemTable) ;
 	if (dentry == 0)
 	{
@@ -66,17 +65,16 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
 	}
 	preload_driver *(*DriverInit)(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) = ((__attribute__((sysv_abi)) preload_driver *(*)(EFI_HANDLE, EFI_SYSTEM_TABLE *) ) dentry) ;
 	preload_driver *gopfb = DriverInit(ImageHandle, SystemTable) ;
-	Print(L"Successfully loaded GOP\r\n") ;
+//	Print(L"Successfully loaded GOP\r\n") ;
 
 #ifdef __DEBUG
 	Print(L"\r\nDriver entry point:  %lx\r\n", (UINTN)dentry) ;
 	Print(L"gop data[0]:  0x%lx\r\n", gopfb->data[0]) ;
 	Print(L"gop data[1]:  0x%lx\r\n", gopfb->data[1]) ;
-	Print(L"gop data[2]:  0x%lx\r\n", gopfb->data[2]) ;
-	Print(L"gop data[3]:  0x%lx\r\n", gopfb->data[3]) ;
+	Print(L"gop data[2]:  %lu\r\n", gopfb->data[2]) ;
+	Print(L"gop data[3]:  %lu\r\n", gopfb->data[3]) ;
 	Print(L"gop error:  %lu\r\n", gopfb->error) ;
 #endif
-
 
 	Print(L"Loading kernel...\r\n") ;
 	entry = ReadElf(L"EFI\\BOOT\\kernel.elf", ImageHandle, SystemTable) ;

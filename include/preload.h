@@ -21,6 +21,14 @@ typedef uint64_t (*preload_read)(void *buffer, uint64_t count) ;		// Returns # b
 typedef uint64_t (*preload_write)(void *buffer, uint64_t count) ;		// Returns # bytes written from buffer to device
 typedef uint64_t (*preload_ioctl)(uint64_t request, ...) ;				// Control the device
 
+//
+// Manifest constants for drivers
+//
+
+#define DRIVER_ERROR	0xffffffff
+#define DRIVER_SUCCESS	0
+
+
 
 //
 // preload_driver:	Contains the definitions needed for the kernel to communicate with the device

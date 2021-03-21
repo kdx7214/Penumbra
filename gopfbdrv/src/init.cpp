@@ -29,9 +29,8 @@ extern "C" preload_driver *DriverInit(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *
 	pd.error = DRIVER_SUCCESS ;
 
 	status = SystemTable->BootServices->LocateProtocol(&gopguid, NULL, (void **)&gop) ;
-	//status = uefi_call_wrapper(BS->LocateProtocol, 3, &gopguid, NULL, (void **)&gop) ;
 	if (status != EFI_SUCCESS) {
-		pd.error = 1 ;
+		pd.error = DRIVER_ERROR ;
 		return &pd ;
 	}
 
@@ -58,24 +57,8 @@ extern "C" preload_driver *DriverInit(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *
 	if (status == EFI_NOT_STARTED) 
 		status = gop->SetMode(gop, 0) ;
 
-
-
-
-
-	int	pitch = 4 * pixperscanline ;
-	unsigned int *pixptr  = (unsigned int *)fbaddr ;
-
-	for (int x = 400; x < 600; x++) {
-		*(unsigned int *)(pixptr + x + 300 * pitch) = 0xffffffff ;
-
-	}
-
-
-
-
-
-
 	if (status != EFI_SUCCESS && native != gop->Mode->Mode) {
+		pd.error = 10 ;
 		return &pd ;
 	}
 
@@ -83,11 +66,13 @@ extern "C" preload_driver *DriverInit(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *
 	num = gop->Mode->MaxMode ;
 	status = gop->QueryMode(gop, native, &size, &info) ;
 	if (status != EFI_SUCCESS) {
+		pd.error = 11 ;
 		return &pd ;
 	}
 
 	status = gop->SetMode(gop, native) ;
 	if (status != EFI_SUCCESS) {
+		pd.error = 12 ;
 		return &pd ;
 	}
 
@@ -97,6 +82,30 @@ extern "C" preload_driver *DriverInit(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *
 	height = gop->Mode->Info->VerticalResolution ;
 	pixperscanline = gop->Mode->Info->PixelsPerScanLine ;
 
+
+
+
+//  BLUE	= 0x000000ff
+//  GREEN	= 0x0000ff00
+//  RED		= 0x00ff0000
+
+
+	int	pitch = 4 * pixperscanline ;
+	unsigned int *pixptr  = (unsigned int *)fbaddr ;
+
+	for (int x = 200; x < 600; x++) {
+//		*(unsigned int *)(pixptr + x * pitch) = 0xffffffff ;
+		*(unsigned int *)(pixptr + x) = 0x00ff0000 ;
+
+	}
+
+
+	pd.data[0] = (uint64_t)fbaddr ;
+	pd.data[1] = pixperscanline ;
+	pd.data[2] = width ;
+	pd.data[3] = height ;
+
+	pd.error = 13 ;
 	return &pd ;
 
 }
